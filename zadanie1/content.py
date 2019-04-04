@@ -39,9 +39,11 @@ def design_matrix(x_train, M):
     for i in range(x_train.size):
         rowList = []
         for j in range(M+1):
+            #wypełniam wiersze macierzy - każdy kolejny element podniesiony jest do kolejnej potęgi
             rowList.append(x_train[i][0]**j)
         list.append(rowList)
     #print(list)
+    #robie macierz numpajową z listy list
     return np.array(list)
 
 
@@ -56,6 +58,7 @@ def least_squares(x_train, y_train, M):
     dopasowania
     """
     designMatrix = design_matrix(x_train, M)
+    # np.liang.inv zwraca macierz odwrotną
     w = np.linalg.inv(designMatrix.transpose() @ designMatrix) @ designMatrix.transpose() @ y_train
     return w, mean_squared_error(x_train, y_train, w)
 
@@ -73,9 +76,7 @@ def regularized_least_squares(x_train, y_train, M, regularization_lambda):
     """
     designMatrix = design_matrix(x_train, M)
     mJednostkowa = regularization_lambda * np.eye(designMatrix.shape[1])
-    #print(designMatrix.shape)
-    #print(mJednostkowa.shape)
-    #print((designMatrix.transpose() @ designMatrix).shape)
+    # np.eye daje nam macierz jednostkową o zadanym kształcie
     w = np.linalg.inv((designMatrix.transpose() @ designMatrix) + mJednostkowa) @ designMatrix.transpose() @ y_train
     return w, mean_squared_error(x_train, y_train, w)
 
@@ -94,10 +95,13 @@ def model_selection(x_train, y_train, x_val, y_val, M_values):
     models = []
     for i in M_values:
         val = least_squares(x_train, y_train, i)
+        # val[0] to wagi/parametry wyznaczonego wielomianu do porównania
         validation_score = mean_squared_error(x_val, y_val, val[0])
+        # dodanie kolejnego elementu do krotki - na jej koniec - operator przecinka ","
         val += validation_score,
         models.append(val)
 
+    # znalezienie najlepszego modelu - o najmniejszym błędzie
     val = models[0]
     for i in models:
         if (i[2] < val[2]):
@@ -119,10 +123,14 @@ def regularized_model_selection(x_train, y_train, x_val, y_val, M, lambda_values
     """
     weights = []
     for i in lambda_values:
+        # parametry w wyznaczone z danego stopnia wielomianu i lambdy razem z błędem - krotka
         weight_with_error = regularized_least_squares(x_train, y_train, M, i)
+        # weight[0] to wagi wielomianu
         walidation_error = mean_squared_error(x_val, y_val, weight_with_error[0])
+        # dodanie na koniec krotki błędu dla ciagu walidacyjnego i wartości parametru lambda dla ktorego zostal on policzony
         weights.append(weight_with_error + (walidation_error,) + (i,))
     best = weights[0]
+    # szukanie najmiejszego błędu na ciągu walidacyjnym
     for i in weights:
         if (best[2] > i[2]):
             best = i
