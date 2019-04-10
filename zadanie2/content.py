@@ -10,7 +10,6 @@ from __future__ import division
 import numpy as np
 
 
-
 def hamming_distance(X, X_train):
     """
     :param X: zbior porownwanych obiektow N1xD
@@ -20,7 +19,36 @@ def hamming_distance(X, X_train):
     zbioru zwrocone zostana w postaci macierzy
     :return: macierz odleglosci pomiedzy obiektami z X i X_train N1xN2
     """
-    pass
+    #print(X)
+    #print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    #print(X_train)
+
+    x_decompresed = X.todense().astype(int)
+    x_decompresed_negated = (~(X.todense())).astype(int)
+
+    x_train_decompresed_negated = (~(X_train.todense())).astype(int)
+    x_train_decompresed = X_train.todense().astype(int)
+
+    multiplied = x_decompresed @ (x_train_decompresed.transpose())
+    negated_multiplayed = x_decompresed_negated @ (x_train_decompresed_negated.transpose())
+
+    # print(multiplied)
+    # print("@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    # print(negated_multiplayed)
+    # print("@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    # print(multiplied.shape)
+    # print(negated_multiplayed.shape)
+
+    similarity_matrinx = multiplied + negated_multiplayed
+
+    dimensions_matrix = x_decompresed.shape[1] * np.ones(similarity_matrinx.shape)
+
+    # print(dimensions_matrix.shape)
+
+    return dimensions_matrix - similarity_matrinx
+
+
+
 
 def sort_train_labels_knn(Dist, y):
     """
@@ -39,6 +67,7 @@ def sort_train_labels_knn(Dist, y):
     """
     pass
 
+
 def p_y_x_knn(y, k):
     """
     Funkcja wyznacza rozklad prawdopodobienstwa p(y|x) dla
@@ -50,6 +79,7 @@ def p_y_x_knn(y, k):
     """
     pass
 
+
 def classification_error(p_y_x, y_true):
     """
     Wyznacz blad klasyfikacji.
@@ -59,6 +89,7 @@ def classification_error(p_y_x, y_true):
     :return: blad klasyfikacji
     """
     pass
+
 
 def model_selection_knn(Xval, Xtrain, yval, ytrain, k_values):
     """
@@ -72,12 +103,14 @@ def model_selection_knn(Xval, Xtrain, yval, ytrain, k_values):
     """
     pass
 
+
 def estimate_a_priori_nb(ytrain):
     """
     :param ytrain: etykiety dla dla danych treningowych 1xN
     :return: funkcja wyznacza rozklad a priori p(y) i zwraca p_y - wektor prawdopodobienstw a priori 1xM
     """
     pass
+
 
 def estimate_p_x_y_nb(Xtrain, ytrain, a, b):
     """
@@ -90,6 +123,7 @@ def estimate_p_x_y_nb(Xtrain, ytrain, a, b):
     """
     pass
 
+
 def p_y_x_nb(p_y, p_x_1_y, X):
     """
     :param p_y: wektor prawdopodobienstw a priori o wymiarach 1xM
@@ -99,6 +133,7 @@ def p_y_x_nb(p_y, p_x_1_y, X):
     Bayesa. Funkcja zwraca macierz p_y_x o wymiarach NxM.
     """
     pass
+
 
 def model_selection_nb(Xtrain, Xval, ytrain, yval, a_values, b_values):
     """
