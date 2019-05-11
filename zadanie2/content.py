@@ -202,10 +202,6 @@ def estimate_p_x_y_nb(Xtrain, ytrain, a, b):
 
 
 
-
-
-
-
 def p_y_x_nb(p_y, p_x_1_y, X):
     """
     :param p_y: wektor prawdopodobienstw a priori o wymiarach 1xM
@@ -214,17 +210,21 @@ def p_y_x_nb(p_y, p_x_1_y, X):
     :return: funkcja wyznacza rozklad prawdopodobienstwa p(y|x) dla kazdej z klas z wykorzystaniem klasyfikatora Naiwnego
     Bayesa. Funkcja zwraca macierz p_y_x o wymiarach NxM.
     """
-    x = X.todense().astype(int)
+    prob_for_classes = []
 
-    prob_for_class = []
+    x = X.toarray()
     prob_word_in_class = p_x_1_y
-
     prob_word_not_in_class = 1 - prob_word_in_class
     x_not = 1 - x
-    
 
-
-
+    for row_index in range(x.shape[0]):
+        success = prob_word_in_class ** x[row_index]
+        fail = prob_word_not_in_class ** x_not[row_index]
+        product_matrix = success * fail
+        numerator = np.prod(product_matrix, axis=1) * p_y
+        denominator = sum(numerator)
+        prob_for_classes.append(numerator/denominator)
+    return prob_for_classes
 
 
 
@@ -241,6 +241,43 @@ def model_selection_nb(Xtrain, Xval, ytrain, yval, a_values, b_values):
     osiagniety blad, best_a - a dla ktorego blad byl najnizszy, best_b - b dla ktorego blad byl najnizszy,
     errors - macierz wartosci bledow dla wszystkich par (a,b)
     """
+    a_length = len(a_values)
+    b_length = len(b_values)
+    p_y = estimate_a_priori_nb(ytrain)
+    errors = np.zeros((a_length, b_length))
+
+    for a in range(0, a_length):
+        for b in range(0, b_length):
+            p_x_y_nb = estimate_p_x_y_nb(Xtrain, ytrain, a_values[a], b_values[b])
+            p_y_x = p_y_x_nb(p_y, p_x_y_nb, Xval)
+            errors[a, b] = classification_error(p_y_x, yval)
+
+    lowest_error_index = np.argmin(errors)
+    lowest_a_index = lowest_error_index // a_length
+    lowest_b_index = lowest_error_index % b_length
+
+    return errors[lowest_a_index, lowest_b_index], a_values[lowest_a_index], b_values[lowest_b_index], errors
 
 
-    pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
